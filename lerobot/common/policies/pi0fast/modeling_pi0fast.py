@@ -22,24 +22,30 @@
 
 Designed by Physical Intelligence. Ported from Jax by Hugging Face.
 
-Example of finetuning the pi0+FAST pretrained model (`pi0_fast_base` in `openpi`):
-```bash
+Example of finetuning the pi0+FAST pretrained model (pi0_fast_base in openpi):
+
+bash
 python lerobot/scripts/train.py \
 --policy.path=lerobot/pi0fast_base \
 --dataset.repo_id=danaaubakirova/koch_test
-```
+
+
 
 Example of training the pi0+FAST neural network with from scratch:
-```bash
+
+bash
 python lerobot/scripts/train.py \
 --policy.type=pi0fast \
 --dataset.repo_id=danaaubakirova/koch_test
-```
+
+
 
 Example of using the pi0 pretrained model outside LeRobot training framework:
-```python
+
+python
 policy = PI0FASTPolicy.from_pretrained("lerobot/pi0fast_base")
-```
+
+
 
 """
 
@@ -138,7 +144,7 @@ class PI0FASTPolicy(PreTrainedPolicy):
             config: Policy configuration class instance or None, in which case the default instantiation of
                     the configuration class is used.
             dataset_stats: Dataset statistics to be used for normalization. If not passed here, it is expected
-                that they will be passed with a call to `load_state_dict` before the policy is used.
+                that they will be passed with a call to load_state_dict before the policy is used.
         """
 
         super().__init__(config)
@@ -153,7 +159,9 @@ class PI0FASTPolicy(PreTrainedPolicy):
             config.output_features, config.normalization_mapping, dataset_stats
         )
 
-        self.language_tokenizer = AutoProcessor.from_pretrained("google/paligemma-3b-pt-224")
+        self.language_tokenizer = AutoProcessor.from_pretrained("bert-base-uncased")
+        #self.language_tokenizer = AutoProcessor.from_pretrained("google/paligemma-3b-mix-224")
+        #self.language_tokenizer = AutoProcessor.from_pretrained("google/paligemma-3b-pt-224")
         self.model = PI0FAST(config)
 
         self.reset()
@@ -196,8 +204,8 @@ class PI0FASTPolicy(PreTrainedPolicy):
     def select_action(self, batch: dict[str, Tensor]) -> Tensor:
         """Select a single action given environment observations.
 
-        This method wraps `select_actions` in order to return one action at a time for execution in the
-        environment. It works by managing the actions in a queue and only calling `select_actions` when the
+        This method wraps select_actions in order to return one action at a time for execution in the
+        environment. It works by managing the actions in a queue and only calling select_actions when the
         queue is empty.
         """
         self.eval()
@@ -224,7 +232,7 @@ class PI0FASTPolicy(PreTrainedPolicy):
             if self.config.adapt_to_pi_aloha:
                 actions = self._pi_aloha_encode_actions(actions)
 
-            # `self.model.forward` returns a (batch_size, n_action_steps, action_dim) tensor, but the queue
+            # self.model.forward returns a (batch_size, n_action_steps, action_dim) tensor, but the queue
             # effectively has shape (n_action_steps, batch_size, *), hence the transpose.
             self._action_queue.extend(actions.transpose(0, 1))
         return self._action_queue.popleft()
@@ -362,7 +370,7 @@ def prepare_inputs_for_generation(
         dtype=self.dtype,
         attn_implementation=self.config.text_config._attn_implementation,
     )
-    # Overwritten -- custom `position_ids` and `pixel_values` handling
+    # Overwritten -- custom position_ids and pixel_values handling
     model_inputs = self.language_model.prepare_inputs_for_generation(
         input_ids,
         past_key_values=past_key_values,

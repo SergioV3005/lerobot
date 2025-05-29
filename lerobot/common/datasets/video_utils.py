@@ -201,9 +201,18 @@ def decode_video_frames_torchcodec(
 
     # convert timestamps to frame indices
     frame_indices = [round(ts * average_fps) for ts in timestamps]
+    
+    # DEBUG
+    max_index = len(decoder) - 1    
+    if any(idx > max_index or idx < 0 for idx in frame_indices):
+        print(f"[ERROR] Tried to access {frame_indices} in video with {len(decoder)} frames (max index {max_index})")
+        # Optionally: raise an error, or filter invalid indices
+        raise IndexError(f"Invalid frame index: requested {frame_indices}, but max allowed is {max_index}")
 
     # retrieve frames based on indices
     frames_batch = decoder.get_frames_at(indices=frame_indices)
+
+#    print(f"[DEBUG] video_path={video_path}, requested indices={frame_indices}, video length={len(decoder)}")
 
     for frame, pts in zip(frames_batch.data, frames_batch.pts_seconds, strict=False):
         loaded_frames.append(frame)
@@ -247,7 +256,7 @@ def encode_video_frames(
     imgs_dir: Path | str,
     video_path: Path | str,
     fps: int,
-    vcodec: str = "libsvtav1",
+    vcodec: str = "libopenh264", #"libsvtav1",  
     pix_fmt: str = "yuv420p",
     g: int | None = 2,
     crf: int | None = 30,

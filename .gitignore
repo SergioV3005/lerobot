@@ -171,3 +171,21 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Trained SAC Agent Lift xarm
+sac_xarm_lift.zip
+
+# Screenshots for the debug
+problems/
+
+# Notes on possible advancements
+notes.txt
+instantiate_cameras.py
+
+.cache/calibration/
+lerobot_cache/
+merged_dataset/
+HF_access_token.txt
+video_test.py
+merge_datasets/
+temp_merge/
