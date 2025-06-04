@@ -171,3 +171,15 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Other files
+edit_watermark/
+merge_datasets/
+HF_access_token.txt
+lerobot_cache/
+temp_merge/
+instantiate_cameras.py
+watermark/
+.cache/calibration/so100/
+
+*.zip
